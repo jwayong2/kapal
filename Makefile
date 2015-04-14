@@ -1,33 +1,20 @@
 DEPS = $(shell go list -f '{{range .TestImports}}{{.}} {{end}}' ./...)
 PACKAGES = $(shell go list ./...)
 
-all: deps format
+all: deps
+	@echo "--> Install and Build"
 	@mkdir -p bin/
-	@bash --norc -i ./scripts/build.sh
-
-cov:
-	gocov test ./... | gocov-html > /tmp/coverage.html
-	open /tmp/coverage.html
+	@go install
+	@go build -o bin/kapal
 
 deps:
 	@echo "--> Installing build dependencies"
 	@go get -d -v ./...
 	@echo $(DEPS) | xargs -n1 go get -d
 
-test: deps
-	./scripts/verify_no_uuid.sh
-	go list ./... | xargs -n1 go test
+clean:
+	@echo "--> Cleaning"
+	@rm -rf bin/
+	@go clean
 
-integ:
-	go list ./... | INTEG_TESTS=yes xargs -n1 go test
-
-# cover: deps
-# 	./scripts/verify_no_uuid.sh
-# 	go list ./... | xargs -n1 go test --cover
-
-format: deps
-	@echo "--> Running go fmt"
-	@go fmt $(PACKAGES)
-
-
-.PHONY: all cov deps integ test
+.PHONY: all deps
