@@ -3,9 +3,39 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
+	"path"
+	"strings"
 	"github.com/codegangsta/cli"
 	"github.com/hoodiez/kapal/btrfs"
 )
+
+func CreateVolume (pool string, name string, dockerize bool, dockername string, dockervol string) {
+	err := btrfscmd.SubvolumeCreate(pool,name)
+	if err != nil {
+		fmt.Errorf("Failed creating Volume in the file system")
+	} else {
+		/*Todo: should be using Docker API and or it's own wrapper Lib*/
+		if dockerize {
+			var cmd *exec.Cmd
+			var containervol string
+			if dockervol != "" {
+				containervol = dockervol
+				if strings.HasPrefix(containervol, "/") == false {
+					containervol = "/"+containervol
+				}
+			} else {
+				containervol = "/data"
+			}
+			if dockername != "" {
+				cmd = exec.Command("docker","create","-v",path.Join(pool,name)+":"+containervol,"--name",dockername,"ubuntu")
+			} else {
+				cmd = exec.Command("docker","create","-v",path.Join(pool,name)+":"+containervol,"ubuntu")
+			}
+			cmd.Run()
+		}
+	}
+}
 
 func main() {
 	version := "0.0.1"
@@ -56,6 +86,7 @@ func main() {
                                 Usage: "Create a new volume in a pool",
                                 Action: func(c *cli.Context) {
                                         fmt.Println("Create Volume: ", c.String("pool"), c.String("name"))
+					CreateVolume(c.String("pool"),c.String("name"),c.Bool("dockerize"),c.String("dockername"),c.String("dockervol"))
                                 },
                                 Flags: []cli.Flag {
                                  cli.StringFlag{
@@ -183,5 +214,4 @@ func main() {
 	app.Run(os.Args)
 
 	/*Testing Btrfs*/
-	btrfscmd.SubvolumeList("/var/lib/docker")
 }
