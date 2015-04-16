@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"bytes"
 	"strings"
 	"github.com/codegangsta/cli"
 	"github.com/hoodiez/kapal/btrfs"
@@ -19,6 +20,7 @@ func CreateVolume (pool string, name string, dockerize bool, dockername string, 
 		if dockerize {
 			var cmd *exec.Cmd
 			var containervol string
+			var out bytes.Buffer
 			if dockervol != "" {
 				containervol = dockervol
 				if strings.HasPrefix(containervol, "/") == false {
@@ -32,11 +34,14 @@ func CreateVolume (pool string, name string, dockerize bool, dockername string, 
 			} else {
 				cmd = exec.Command("docker","create","-v",path.Join(pool,name)+":"+containervol,"ubuntu")
 			}
+			cmd.Stdout = &out
 			err2 := cmd.Run()
+
 			if err2 != nil {
 				fmt.Println("Error creating Docker Data Volume Container")
+			} else {
+				fmt.Print(out.String())
 			}
-			
 		}
 	}
 }
@@ -50,6 +55,8 @@ func CloneVolume (pool string, source string, target string, readonly bool, dock
                 if dockerize {
                         var cmd *exec.Cmd
                         var containervol string
+			var out bytes.Buffer
+			
                         if dockervol != "" {
                                 containervol = dockervol
                                 if strings.HasPrefix(containervol, "/") == false {
@@ -63,10 +70,14 @@ func CloneVolume (pool string, source string, target string, readonly bool, dock
                         } else {
                                 cmd = exec.Command("docker","create","-v",path.Join(pool,target)+":"+containervol,"ubuntu")
                         }
+			cmd.Stdout = &out
                         err2 := cmd.Run()
+
                         if err2 != nil {
                                 fmt.Println("Error creating Docker Data Volume Container")
-                        }
+                        } else {
+				fmt.Print(out.String())
+			}
 
                 }
         }
