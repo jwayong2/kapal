@@ -13,7 +13,7 @@ import (
 func CreateVolume (pool string, name string, dockerize bool, dockername string, dockervol string) {
 	err := btrfscmd.SubvolumeCreate(pool,name)
 	if err != nil {
-		fmt.Errorf("Failed creating Volume in the file system")
+		fmt.Println("Failed creating Volume in the file system")
 	} else {
 		/*Todo: should be using Docker API and or it's own wrapper Lib*/
 		if dockerize {
@@ -32,9 +32,44 @@ func CreateVolume (pool string, name string, dockerize bool, dockername string, 
 			} else {
 				cmd = exec.Command("docker","create","-v",path.Join(pool,name)+":"+containervol,"ubuntu")
 			}
-			cmd.Run()
+			err2 := cmd.Run()
+			if err2 != nil {
+				fmt.Println("Error creating Docker Data Volume Container")
+			}
+			
 		}
 	}
+}
+
+func CloneVolume (pool string, source string, target string, readonly bool, dockerize bool, dockername string, dockervol string) {
+	err := btrfscmd.SubvolumeSnapshot(pool,source,target,readonly)
+	if err != nil {
+                fmt.Println("Failed cloning Volume in the file system")
+        } else {
+                /*Todo: should be using Docker API and or it's own wrapper Lib*/
+                if dockerize {
+                        var cmd *exec.Cmd
+                        var containervol string
+                        if dockervol != "" {
+                                containervol = dockervol
+                                if strings.HasPrefix(containervol, "/") == false {
+                                        containervol = "/"+containervol
+                                }
+                        } else {
+                                containervol = "/data"
+                        }
+                        if dockername != "" {
+                                cmd = exec.Command("docker","create","-v",path.Join(pool,target)+":"+containervol,"--name",dockername,"ubuntu")
+                        } else {
+                                cmd = exec.Command("docker","create","-v",path.Join(pool,target)+":"+containervol,"ubuntu")
+                        }
+                        err2 := cmd.Run()
+                        if err2 != nil {
+                                fmt.Println("Error creating Docker Data Volume Container")
+                        }
+
+                }
+        }
 }
 
 func main() {
@@ -146,6 +181,7 @@ func main() {
 				Usage: "Clone a volume into a another volume in a pool",
 				Action: func(c *cli.Context) {
                                         fmt.Println("Clone Volume: ", c.String("pool"),c.String("source"),c.String("target"))
+					CloneVolume(c.String("pool"),c.String("source"),c.String("target"),c.Bool("readonly"),c.Bool("dockerize"),c.String("dockername"),c.String("dockervol"))
                                 },
                                 Flags: []cli.Flag {
                                  cli.StringFlag{
