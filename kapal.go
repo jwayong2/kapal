@@ -35,18 +35,6 @@ func main() {
 				  Name: "mount, m",
 				  Usage: "mount point path of the storage pool, e.g. /var/lib/kapal",
 				 },
-				 cli.BoolFlag{
-				  Name: "dockerize, d",
-				  Usage: "Also create a docker data volume container, default is false",
-				 },
-				 cli.StringFlag{
-				  Name: "dockername",
-				  Usage: "Name of docker data volume container, default will use docker automatic naming",
-				 },
-				 cli.StringFlag{
-				  Name: "dockervol",
-				  Usage: "Docker Volume path mounted inside the container, default is /data",
-			         },
 				},
 			 },
 			 {
@@ -77,6 +65,18 @@ func main() {
                                  cli.StringFlag{
                                   Name: "name, n",
                                   Usage: "name of the volume, e.g. vol01",
+                                 },
+				 cli.BoolFlag{
+                                  Name: "dockerize, d",
+                                  Usage: "Also create a docker data volume container, default is false",
+                                 },
+                                 cli.StringFlag{
+                                  Name: "dockername",
+                                  Usage: "Name of docker data volume container, default will use docker automatic naming",
+                                 },
+                                 cli.StringFlag{
+                                  Name: "dockervol",
+                                  Usage: "Docker Volume path mounted inside the container, default is /data",
                                  },
                                 },
                          },
