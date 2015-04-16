@@ -3,9 +3,74 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
+	"path"
+	"strings"
 	"github.com/codegangsta/cli"
 	"github.com/hoodiez/kapal/btrfs"
 )
+
+func CreateVolume (pool string, name string, dockerize bool, dockername string, dockervol string) {
+	err := btrfscmd.SubvolumeCreate(pool,name)
+	if err != nil {
+		fmt.Println("Failed creating Volume in the file system")
+	} else {
+		/*Todo: should be using Docker API and or it's own wrapper Lib*/
+		if dockerize {
+			var cmd *exec.Cmd
+			var containervol string
+			if dockervol != "" {
+				containervol = dockervol
+				if strings.HasPrefix(containervol, "/") == false {
+					containervol = "/"+containervol
+				}
+			} else {
+				containervol = "/data"
+			}
+			if dockername != "" {
+				cmd = exec.Command("docker","create","-v",path.Join(pool,name)+":"+containervol,"--name",dockername,"ubuntu")
+			} else {
+				cmd = exec.Command("docker","create","-v",path.Join(pool,name)+":"+containervol,"ubuntu")
+			}
+			err2 := cmd.Run()
+			if err2 != nil {
+				fmt.Println("Error creating Docker Data Volume Container")
+			}
+			
+		}
+	}
+}
+
+func CloneVolume (pool string, source string, target string, readonly bool, dockerize bool, dockername string, dockervol string) {
+	err := btrfscmd.SubvolumeSnapshot(pool,source,target,readonly)
+	if err != nil {
+                fmt.Println("Failed cloning Volume in the file system")
+        } else {
+                /*Todo: should be using Docker API and or it's own wrapper Lib*/
+                if dockerize {
+                        var cmd *exec.Cmd
+                        var containervol string
+                        if dockervol != "" {
+                                containervol = dockervol
+                                if strings.HasPrefix(containervol, "/") == false {
+                                        containervol = "/"+containervol
+                                }
+                        } else {
+                                containervol = "/data"
+                        }
+                        if dockername != "" {
+                                cmd = exec.Command("docker","create","-v",path.Join(pool,target)+":"+containervol,"--name",dockername,"ubuntu")
+                        } else {
+                                cmd = exec.Command("docker","create","-v",path.Join(pool,target)+":"+containervol,"ubuntu")
+                        }
+                        err2 := cmd.Run()
+                        if err2 != nil {
+                                fmt.Println("Error creating Docker Data Volume Container")
+                        }
+
+                }
+        }
+}
 
 func main() {
 	version := "0.0.1"
@@ -35,18 +100,6 @@ func main() {
 				  Name: "mount, m",
 				  Usage: "mount point path of the storage pool, e.g. /var/lib/kapal",
 				 },
-				 cli.BoolFlag{
-				  Name: "dockerize, d",
-				  Usage: "Also create a docker data volume container, default is false",
-				 },
-				 cli.StringFlag{
-				  Name: "dockername",
-				  Usage: "Name of docker data volume container, default will use docker automatic naming",
-				 },
-				 cli.StringFlag{
-				  Name: "dockervol",
-				  Usage: "Docker Volume path mounted inside the container, default is /data",
-			         },
 				},
 			 },
 			 {
@@ -68,6 +121,7 @@ func main() {
                                 Usage: "Create a new volume in a pool",
                                 Action: func(c *cli.Context) {
                                         fmt.Println("Create Volume: ", c.String("pool"), c.String("name"))
+					CreateVolume(c.String("pool"),c.String("name"),c.Bool("dockerize"),c.String("dockername"),c.String("dockervol"))
                                 },
                                 Flags: []cli.Flag {
                                  cli.StringFlag{
@@ -77,6 +131,18 @@ func main() {
                                  cli.StringFlag{
                                   Name: "name, n",
                                   Usage: "name of the volume, e.g. vol01",
+                                 },
+				 cli.BoolFlag{
+                                  Name: "dockerize, d",
+                                  Usage: "Also create a docker data volume container, default is false",
+                                 },
+                                 cli.StringFlag{
+                                  Name: "dockername",
+                                  Usage: "Name of docker data volume container, default will use docker automatic naming",
+                                 },
+                                 cli.StringFlag{
+                                  Name: "dockervol",
+                                  Usage: "Docker Volume path mounted inside the container, default is /data",
                                  },
                                 },
                          },
@@ -115,6 +181,7 @@ func main() {
 				Usage: "Clone a volume into a another volume in a pool",
 				Action: func(c *cli.Context) {
                                         fmt.Println("Clone Volume: ", c.String("pool"),c.String("source"),c.String("target"))
+					CloneVolume(c.String("pool"),c.String("source"),c.String("target"),c.Bool("readonly"),c.Bool("dockerize"),c.String("dockername"),c.String("dockervol"))
                                 },
                                 Flags: []cli.Flag {
                                  cli.StringFlag{
@@ -183,5 +250,4 @@ func main() {
 	app.Run(os.Args)
 
 	/*Testing Btrfs*/
-	btrfscmd.SubvolumeList("/var/lib/docker")
 }
