@@ -1,12 +1,22 @@
+
 package sysfs
 
-
+import(
+	"os"
+	"bufio"
+	"log"
+	"errors"
+	"strings"
+	"fmt"
+	"os/exec"
+	"path/filepath"
+)
 
 
 // ListDevices prints a list of all storage devices attached to a linux machine
 func ListDevicesCmd() {
 	for _, dev := range findDevices() {
-		fmt.Printf("--> %s\n", dev)
+		fmt.Printf("--> %s", dev)
 	}
 }
 
@@ -22,8 +32,9 @@ func findDevices() []string {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		device, err := getDeviceName(scanner.Text())
-		if err != nil {
-			devices = append(devices, device)
+		if err == nil {
+			devDesc := recognizeTypeDevice(device)
+			devices = append(devices, devDesc)
 		}
 	}
 
@@ -35,13 +46,22 @@ func findDevices() []string {
 }
 
 func getDeviceName(line string) (string, error){
-	parts, err := line.Split()
-	if len(parts) == 4 && isStorageDevice(parts[3]){
-		return parts[3]
+	parts := strings.Fields(line)
+	if len(parts) >= 4 && isStorageDevice(parts[3]){
+		return parts[3], nil
 	}
-	return errors.New("Line does not contain any storage device")
+	return "", errors.New("Line does not contain any storage device")
 }
 
 func isStorageDevice(devName string) bool {
 	return strings.HasPrefix(devName, "hd") || strings.HasPrefix(devName, "sd")
+}
+
+func recognizeTypeDevice(devName string) string {
+	output, err := exec.Command("file", "-s", filepath.Join("/dev", devName)).CombinedOutput()
+	if err != nil{
+		log.Fatal(err)
+	}
+	return string(output)
+
 }

@@ -93,15 +93,17 @@ func main() {
 	app.Authors = []cli.Author{cli.Author{Name: "hoodiez", Email:"https://github.com/hoodiez"},cli.Author{Name: "jteso",Email: "https://github.com/jteso"}}
 	app.Commands = []cli.Command {
 		{
-			Name: "devices",
-			Usage: "Exposes information about your system device tree"
+			Name: "device",
+			Aliases: []string{"d"},
+			Usage: "Exposes information about your system device tree",
 			Subcommands: []cli.Command {
-				Name: "list",
-				Usage: "List of all attached storage devices",
-				Action: func(c *cli.Context){
+				{ Name: "list",
+				  Usage: "List of all attached storage devices",
+				  Action: func(c *cli.Context){
 						sysfs.ListDevicesCmd()
-				}
-			}
+				  },
+				},
+			},
 		},
 		{
 			Name: "pool",
