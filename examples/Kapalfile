@@ -1,0 +1,10 @@
+[volume "hoodiez"]
+pool=/var/lib/docker
+type=btrfs
+
+[volume "hoodiez2"]
+pool=/var/lib/docker
+type=btrfs
+dockerize=true
+dockername=hoodiez2
+dockervol=/hoodiez
