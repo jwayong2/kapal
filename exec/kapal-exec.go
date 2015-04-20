@@ -17,7 +17,7 @@ type CmdWrapper struct {
 	cmd *exec.Cmd
 }
 
-func InitDefaultHooks(preHook, postHook func()){
+func InitDefaultHooks(preHook, postHook func()) {
 	DEFAULT_PRE_HOOK = preHook
 	DEFAULT_POST_HOOK = postHook
 }
@@ -29,13 +29,13 @@ func Command(name string, arg ...string) *CmdWrapper {
 
 func (cw CmdWrapper) Run() error {
 	DEFAULT_PRE_HOOK()
-	err:= cw.cmd.Run()
+	err := cw.cmd.Run()
 	DEFAULT_POST_HOOK()
 
 	return err
 }
 
-func init(){
-	DEFAULT_PRE_HOOK = func(){}
-	DEFAULT_POST_HOOK = func(){}
+func init() {
+	DEFAULT_PRE_HOOK = func() {}
+	DEFAULT_POST_HOOK = func() {}
 }

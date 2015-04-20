@@ -88,7 +88,7 @@ func SubvolumeSnapshotList(volume string, parentsubvolume string) (result []stri
 			lines2 := strings.Split(out2.String(), "\n")
 			for _, line2 := range lines2 {
 				tokens := strings.Split(line2, " ")
-				if len(tokens)==18 && tokens[13] == parent_uuid {
+				if len(tokens) == 18 && tokens[13] == parent_uuid {
 					result = append(result, tokens[17])
 				}
 			}
