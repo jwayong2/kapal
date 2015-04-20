@@ -69,7 +69,7 @@ func recognizeTypeDevice(devName string) string {
 		}
 		return strings.TrimRight(string(output), "\n")
 	}
-	return "/dev/" + devName
+	return filepath.Join("/dev/", devName)
 }
 
 func isSudoerUser() bool {
