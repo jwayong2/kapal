@@ -10,7 +10,7 @@ import (
 )
 
 func CreateVolume (pool string, name string, dockerize bool, dockername string, dockervol string) {
-        err := btrfscmd.SubvolumeCreate(pool,name)
+        err := btrfs.SubvolumeCreate(pool,name)
         if err != nil {
                 fmt.Println("Failed creating Volume in the file system")
         } else {
@@ -45,7 +45,7 @@ func CreateVolume (pool string, name string, dockerize bool, dockername string, 
 }
 
 func CloneVolume (pool string, source string, target string, readonly bool, dockerize bool, dockername string, dockervol string) {
-        err := btrfscmd.SubvolumeSnapshot(pool,source,target,readonly)
+        err := btrfs.SubvolumeSnapshot(pool,source,target,readonly)
         if err != nil {
                 fmt.Println("Failed cloning Volume in the file system")
         } else {

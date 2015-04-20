@@ -1,0 +1,62 @@
++-------------------+
+|  KAPALFILE        |
++-------------------+
+
+# -------
+# Devices
+# -------
+[device "dev_1"]
+type=sata
+location=10.5.4.20:/dev/sdb
+
+[device "dev_2"]
+type=sata
+location=10.5.4.3:/dev/sdb
+
+[device "amazon_s3"]
+type=s3
+location=https://s3.amazon.com/<bucket>/....
+access_key=secr3t
+secret_key=dunno
+
+# -------
+# Pools
+# -------
+[pool "db_pool"]
+devices=dev_1, dev_2
+replication=mirror
+
+# -------
+# Volumes
+# -------
+[volume "db_vol"]
+from=db_pool
+type=btrfs
+mountpoint=/var/lib/mysql
+
+[volume "db_databak"]
+device=amazon_s3
+type=s3fs
+mountpoint=/data/mysql_backup
+
+# -------
+# Docker
+# -------
+[docker "data_container"]
+from=centos
+volumes = db_pool:/hoddiez, db_databak:/hoddiez_bak
+
+# -------
+# Backup
+# -------
+[backup]
+strategy=snapshot
+cron=0 0 * * *
+source=db_pool
+target=db_databak
+
+# ---------
+# Provision
+# ---------
+[provision]
+exec=./provision.sh
