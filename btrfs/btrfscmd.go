@@ -3,6 +3,8 @@ package btrfs
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"os"
 	"os/exec"
 	"path"
 	"strings"
@@ -97,4 +99,37 @@ func SubvolumeSnapshotList(volume string, parentsubvolume string) (result []stri
 	return
 }
 
-/* TODO: BTRFS Send and Recv */
+func SendReceive(sourcevolume string, sourcesubvolume string, targetvolume string, parentsubvolume string, remotehost string) {
+	var cmd1 *exec.Cmd
+	var cmd2 *exec.Cmd	
+	if(parentsubvolume != "") {
+		cmd1 = exec.Command("btrfs","send","-p",path.Join(sourcevolume,parentsubvolume),path.Join(sourcevolume,sourcesubvolume))	
+	} else {
+		cmd1 = exec.Command("btrfs","send",path.Join(sourcevolume,sourcesubvolume))
+	}
+
+	if(remotehost != "") {
+		cmd2 = exec.Command("ssh",remotehost,"btrfs","receive",targetvolume)
+	} else {
+		cmd2 = exec.Command("btrfs","receive",targetvolume)
+	}
+    	r, w := io.Pipe() 
+    	cmd1.Stdout = w
+    	cmd2.Stdin = r
+
+    	var b2 bytes.Buffer
+    	cmd2.Stdout = &b2
+
+    	cmd1.Start()
+    	cmd2.Start()
+    	err1 := cmd1.Wait()
+    	w.Close()
+    	err2 := cmd2.Wait()
+    	io.Copy(os.Stdout, &b2)
+	if(err1 != nil) {
+		fmt.Println("Error Send ",err1)
+	}
+	if(err2 != nil) {
+		fmt.Println("Error Receive ", err2)
+	}
+}

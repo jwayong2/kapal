@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/hoodiez/kapal/btrfs"
+	"os"
 	"os/exec"
 	"path"
 	"strings"
+	"time"
 )
 
 func CreateVolume(pool string, name string, dockerize bool, dockername string, dockervol string) {
@@ -78,5 +80,20 @@ func CloneVolume(pool string, source string, target string, readonly bool, docke
 			}
 
 		}
+	}
+}
+
+func BackupVolume(sourcepool string, targetpool string, volume string, remotehost string) {
+	timestamp := time.Now().Local().Format("20060102150405")
+	backupname := strings.Join([]string{volume,timestamp},"_")
+	parentname := strings.Join([]string{volume,"0"},"_")
+	if _, err := os.Stat(path.Join(sourcepool,parentname)); err == nil {
+		CloneVolume(sourcepool,volume,backupname,true,false,"","")
+		btrfs.Sync()
+		btrfs.SendReceive(sourcepool, backupname, targetpool, parentname, remotehost)
+	} else {
+		CloneVolume(sourcepool,volume,parentname, true, false, "", "")
+		btrfs.Sync()
+		btrfs.SendReceive(sourcepool, parentname, targetpool, "", remotehost)
 	}
 }
