@@ -176,7 +176,7 @@ func main() {
 					Name:  "backup",
 					Usage: "Backup a volume from one pool to another local or remote pool",
 					Action: func(c *cli.Context) {
-						fmt.Println("Clone Volume: ", c.String("pool"), c.String("source"), c.String("target"))
+						cmds.BackupVolume(c.String("pool"), c.String("targetpool"), c.String("name"),c.String("remote"))
 					},
 					Flags: []cli.Flag{
 						cli.StringFlag{
@@ -194,10 +194,6 @@ func main() {
 						cli.StringFlag{
 							Name:  "remote, r",
 							Usage: "remote host or ip address",
-						},
-						cli.StringFlag{
-							Name:  "clonename, c",
-							Usage: "specific backup clone name",
 						},
 					},
 				},
