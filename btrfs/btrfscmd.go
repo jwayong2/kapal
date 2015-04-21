@@ -109,7 +109,7 @@ func SendReceive(sourcevolume string, sourcesubvolume string, targetvolume strin
 	}
 
 	if(remotehost != "") {
-		cmd2 = exec.Command("btrfs","receive","ssh",remotehost,targetvolume)
+		cmd2 = exec.Command("ssh",remotehost,"btrfs","receive",targetvolume)
 	} else {
 		cmd2 = exec.Command("btrfs","receive",targetvolume)
 	}
