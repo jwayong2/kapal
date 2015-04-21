@@ -7,9 +7,7 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/hoodiez/kapal/cmds"
 	"github.com/hoodiez/kapal/config"
-	"github.com/hoodiez/kapal/exec"
 	"github.com/hoodiez/kapal/sysfs"
-	"log"
 )
 
 func main() {
