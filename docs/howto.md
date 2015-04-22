@@ -8,7 +8,7 @@ Map `docker.sock` as a volume from the host to the container:
 
 - Map the volume
 ```bash
-dock run -it --rm /var/run/docker.sock:/var/run/docker.sock <DKR_IMAGE> /bin/bash
+dock run -it --rm -v /var/run/docker.sock:/var/run/docker.sock <DKR_IMAGE> /bin/bash
 ```
 
 - Test it
