@@ -17,3 +17,9 @@ echo -e "GET /images/json HTTP/1.0\r\n" | nc -U /var/run/docker.sock
 ```
 
 Note. If `nc -U` fails, ensure you have `netcat-openbsd` installed and not `netcat-traditional`
+
+
+How to create devices from Vagrants
+============
+## Solution
+[Link](https://gist.github.com/leifg/4713995)
