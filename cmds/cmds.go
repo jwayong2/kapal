@@ -3,7 +3,7 @@ package cmds
 import (
 	"bytes"
 	"fmt"
-	"github.com/hoodiez/kapal/btrfs"
+	"github.com/hoodiez/kapal/btrfscmd"
 	"os"
 	"os/exec"
 	"path"
