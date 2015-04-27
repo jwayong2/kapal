@@ -12,7 +12,7 @@ import (
 )
 
 func CreateVolume(pool string, name string, dockerize bool, dockername string, dockervol string) {
-	err := btrfs.SubvolumeCreate(pool, name)
+	err := btrfscmd.SubvolumeCreate(pool, name)
 	if err != nil {
 		fmt.Println("Failed creating Volume in the file system")
 	} else {
@@ -47,7 +47,7 @@ func CreateVolume(pool string, name string, dockerize bool, dockername string, d
 }
 
 func CloneVolume(pool string, source string, target string, readonly bool, dockerize bool, dockername string, dockervol string) {
-	err := btrfs.SubvolumeSnapshot(pool, source, target, readonly)
+	err := btrfscmd.SubvolumeSnapshot(pool, source, target, readonly)
 	if err != nil {
 		fmt.Println("Failed cloning Volume in the file system")
 	} else {
@@ -89,11 +89,11 @@ func BackupVolume(sourcepool string, targetpool string, volume string, remotehos
 	parentname := strings.Join([]string{volume,"0"},"_")
 	if _, err := os.Stat(path.Join(sourcepool,parentname)); err == nil {
 		CloneVolume(sourcepool,volume,backupname,true,false,"","")
-		btrfs.Sync()
-		btrfs.SendReceive(sourcepool, backupname, targetpool, parentname, remotehost)
+		btrfscmd.Sync()
+		btrfscmd.SendReceive(sourcepool, backupname, targetpool, parentname, remotehost)
 	} else {
 		CloneVolume(sourcepool,volume,parentname, true, false, "", "")
-		btrfs.Sync()
-		btrfs.SendReceive(sourcepool, parentname, targetpool, "", remotehost)
+		btrfscmd.Sync()
+		btrfscmd.SendReceive(sourcepool, parentname, targetpool, "", remotehost)
 	}
 }

@@ -1,4 +1,4 @@
-package btrfs
+package btrfscmd
 
 import (
 	"bytes"
