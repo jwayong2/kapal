@@ -30,7 +30,7 @@ func CreateVolume(pool string, name string, dockerize bool, dockername string, d
 				containervol = "/data"
 			}
 			if dockername != "" {
-				cmd = exec.Command("docker", "create", "-v", path.Join(pool, name)+":"+containervol, "--name", dockername, "ubuntu")
+				cmd = exec.Command("docker", "create","-l","kapal=true", "-v", path.Join(pool, name)+":"+containervol, "--name", dockername, "ubuntu")
 			} else {
 				cmd = exec.Command("docker", "create", "-v", path.Join(pool, name)+":"+containervol, "ubuntu")
 			}
@@ -66,7 +66,7 @@ func CloneVolume(pool string, source string, target string, readonly bool, docke
 				containervol = "/data"
 			}
 			if dockername != "" {
-				cmd = exec.Command("docker", "create", "-v", path.Join(pool, target)+":"+containervol, "--name", dockername, "ubuntu")
+				cmd = exec.Command("docker", "create","-l","kapal=true", "-v", path.Join(pool, target)+":"+containervol, "--name", dockername, "ubuntu")
 			} else {
 				cmd = exec.Command("docker", "create", "-v", path.Join(pool, target)+":"+containervol, "ubuntu")
 			}
